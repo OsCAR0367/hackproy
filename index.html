@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Podcasts AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .result-box p, .result-box pre {
+            color: #555;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .result-box pre {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .podcast-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .podcast-info h3 {
+            margin-bottom: 10px;
+        }
+
+        .podcast-path {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin-top: 10px;
+        }
+
+        .example-paths {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .example-paths h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .example-paths code {
+            display: block;
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ Generador de Podcasts AI</h1>
+            <p>Convierte audio en podcast profesional con IA</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="audioPath">Ruta del Archivo de Audio (MP3, WAV, etc.)</label>
+                    <input 
+                        type="text" 
+                        id="audioPath" 
+                        placeholder="Ej: C:/Users/Usuario/Descargas/audio.mp3"
+                    >
+                </div>
+
+                <div class="example-paths">
+                    <h4>📝 Ejemplos de rutas válidas:</h4>
+                    <code>C:/Users/Usuario/Descargas/audio.mp3</code>
+                    <code>D:/Musica/podcast.wav</code>
+                    <code>C:/audio/entrevista.aac</code>
+                </div>
+
+                <button class="btn" id="processBtn" onclick="processAudio()">
+                    🚀 Generar Podcast
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p><strong>Procesando audio...</strong></p>
+                <p>Esto puede tardar unos minutos. Por favor espera.</p>
+            </div>
+
+            <div class="results" id="results">
+                <div class="success-message" id="successMessage"></div>
+                
+                <div class="result-box">
+                    <h3>📝 Transcripción</h3>
+                    <pre id="transcription"></pre>
+                </div>
+
+                <div class="result-box">
+                    <h3>📋 Resumen</h3>
+                    <p id="summary"></p>
+                </div>
+
+                <div class="result-box">
+                    <h3>🎬 Guion del Podcast</h3>
+                    <pre id="script"></pre>
+                </div>
+
+                <div class="podcast-info">
+                    <h3>✅ Podcast Generado Exitosamente</h3>
+                    <p>El archivo de audio se ha guardado en:</p>
+                    <div class="podcast-path" id="podcastPath"></div>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        async function processAudio() {
+            const audioPath = document.getElementById('audioPath').value.trim();
+            const processBtn = document.getElementById('processBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Validación
+            if (!audioPath) {
+                errorMessage.textContent = '⚠️ Por favor ingresa la ruta del archivo de audio';
+                errorMessage.style.display = 'block';
+                setTimeout(() => errorMessage.style.display = 'none', 3000);
+                return;
+            }
+
+            // Resetear UI
+            errorMessage.style.display = 'none';
+            results.style.display = 'none';
+            loading.style.display = 'block';
+            processBtn.disabled = true;
+
+            try {
+                // Llamar al backend
+                const response = await fetch('http://localhost:5000/process_audio', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        audio_path: audioPath
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Mostrar resultados
+                    document.getElementById('successMessage').textContent = 
+                        '✅ ' + data.message;
+                    document.getElementById('transcription').textContent = 
+                        data.transcription;
+                    document.getElementById('summary').textContent = 
+                        data.summary;
+                    document.getElementById('script').textContent = 
+                        data.script;
+                    document.getElementById('podcastPath').textContent = 
+                        data.podcast_path;
+                    
+                    results.style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = 
+                    '❌ Error: ' + error.message + 
+                    '\n\nAsegúrate de que:\n' +
+                    '1. El servidor Python esté ejecutándose\n' +
+                    '2. La ruta del archivo sea correcta\n' +
+                    '3. El archivo exista y sea un formato válido';
+                errorMessage.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                processBtn.disabled = false;
+            }
+        }
+
+        // Permitir enviar con Enter
+        document.getElementById('audioPath').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processAudio();
+            }
+        });
+
+        // Verificar que el servidor esté disponible al cargar
+        window.addEventListener('load', async function() {
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                if (response.ok) {
+                    console.log('✅ Servidor conectado correctamente');
+                }
+            } catch (error) {
+                console.warn('⚠️ No se pudo conectar al servidor. Asegúrate de ejecutar el script Python primero.');
+            }
+        });
+    </script>
+</body>
+</html>
